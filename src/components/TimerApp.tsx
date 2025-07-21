@@ -12,6 +12,8 @@ import MetadataUpdater from "./MetaDataUpdater";
 import { useState, useEffect } from "react";
 import { playNotificationSound } from "@/utils/sound";
 import { useReward } from "react-rewards";
+import { Switch } from "@/components/ui/switch";
+import { generateRefreshSuggestion } from "@/utils/gemini";
 
 //タイマーのモードを表す型
 type Mode = "work" | "break";
@@ -44,6 +46,9 @@ const TimerApp = () => {
   //モードの状態を管理する変数
   const [mode, setMode] = useState<Mode>("work");
 
+  //自動開始の設定
+  const [autoStart, setAutoStart] = useState(false);
+
   //モードを切り替える関数
   const toggleMode = () => {
     //現在のモードを切り替える
@@ -57,8 +62,8 @@ const TimerApp = () => {
       seconds: 0,
     });
 
-    //タイマーを停止状態にする
-    setIsRunning(false);
+    //自動開始がONの場合は次のセッションを自動開始
+    setIsRunning(autoStart);
   };
 
   //開始/停止ボタンのハンドラ
@@ -87,11 +92,15 @@ const TimerApp = () => {
             //分数が0の場合
             if (prev.minutes === 0) {
               setIsRunning(false); //タイマーを停止
-              toggleMode(); //モードを自動で切替
               if (mode === "work") {
                 void confetti(); //紙吹雪を表示
               }
-              void playNotificationSound(); //音声を再生
+              void playNotificationSound();
+
+              //少し遅延させてからモード切替と自動開始を実行
+              setTimeout(() => {
+                toggleMode(); //モードを自動で切替
+              }, 100);
               return prev; //現在の状態（0分0秒）を返す
             }
             //分数がまだ残っている場合
@@ -110,6 +119,14 @@ const TimerApp = () => {
       }
     };
   }, [isRunning]);
+
+  useEffect(() => {
+    const testGemini = async () => {
+      const suggestion = await generateRefreshSuggestion();
+      console.log(suggestion);
+    };
+    testGemini();
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4 relative">
@@ -138,7 +155,7 @@ const TimerApp = () => {
         </CardHeader>
         <CardFooter className="flex flex-col w-full max-w-[200px] mx-auto">
           {/* 作業時間の設定 */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-4">
             <label className="text-sm font-medium min-w-[4.5rem]">
               作業時間
             </label>
@@ -151,7 +168,7 @@ const TimerApp = () => {
                   setTimeLeft({ minutes: newDuration, seconds: 0 });
                 }
               }}
-              className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
             >
               {[5, 10, 15, 25, 30, 45, 60].map((minutes) => (
                 <option key={minutes} value={minutes}>
@@ -160,8 +177,9 @@ const TimerApp = () => {
               ))}
             </select>
           </div>
+
           {/* 休憩時間の設定 */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-4">
             <label className="text-sm font-medium min-w-[4.5rem]">
               休憩時間
             </label>
@@ -174,7 +192,7 @@ const TimerApp = () => {
                   setTimeLeft({ minutes: newDuration, seconds: 0 });
                 }
               }}
-              className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
             >
               {[5, 10, 15].map((minutes) => (
                 <option key={minutes} value={minutes}>
@@ -182,6 +200,18 @@ const TimerApp = () => {
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* 自動開始の設定 */}
+          <div className="flex items-center gap-2 w-full justify-around ">
+            <label className="text-sm font-medium min-w-[4.5rem]">
+              自動開始
+            </label>
+            <Switch
+              checked={autoStart}
+              onCheckedChange={() => setAutoStart(!autoStart)}
+              className="cursor-pointer"
+            />
           </div>
         </CardFooter>
       </Card>
