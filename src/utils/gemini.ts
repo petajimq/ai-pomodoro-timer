@@ -1,19 +1,29 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-// Gemini API クライアントの初期化
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-
-export async function generateRefreshSuggestion(): Promise<string> {
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-  const prompt = "1分でできる簡単なリフレッシュ方法を1行で教えて";
-
+export const generateRefreshSuggestion = async (): Promise<string> => {
   try {
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
-    return text.trim();
-  } catch (error) {
-    console.error("Failed to generate suggestion:", error);
+    // サーバーサイドのAPIルートを呼び出す
+    const response = await fetch("/api/gemini", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      // バックエンドからのエラーメッセージをログに出力
+      console.error("API Route Error Response:", errorData.message);
+      throw new Error(
+        errorData.message || "Failed to fetch suggestion from API route."
+      );
+    }
+
+    const data = await response.json();
+    return data.suggestion;
+  } catch (err: any) {
+    console.error(
+      err,
+      "Failed to generate suggestion (client-side fetch error)"
+    );
     return "エラーが発生しました";
   }
-}
+};
