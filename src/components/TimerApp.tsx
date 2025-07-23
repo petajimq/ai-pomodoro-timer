@@ -68,6 +68,12 @@ const TimerApp = () => {
       seconds: 0,
     });
 
+    if (newMode === "break") {
+      generateRefreshSuggestion()
+        .then((suggestion) => setRefreshSuggestion(suggestion))
+        .catch(console.error);
+    }
+
     //自動開始がONの場合は次のセッションを自動開始
     setIsRunning(autoStart);
   };
@@ -85,54 +91,49 @@ const TimerApp = () => {
       seconds: 0,
     });
   };
-
   useEffect(() => {
-    //setIntervalの戻り値(タイマーID)を保持する変数
+    // setIntervelの戻り値（タイマーID）を保持する変数
     let intervalId: NodeJS.Timeout;
 
+    // タイマーが実行中の場合のみ処理を行う
     if (isRunning) {
+      // 1秒（1000ミリ秒）ごとに実行される処理を設定しつつ、
+      // 戻り値（タイマーID）を intervalId 変数に再セット
       intervalId = setInterval(() => {
         setTimeLeft((prev) => {
-          //秒数が0の場合
+          // 秒数が0の場合
           if (prev.seconds === 0) {
-            //分数が0の場合
+            // 分数が0の場合（タイマー終了）
             if (prev.minutes === 0) {
-              setIsRunning(false); //タイマーを停止
+              setIsRunning(false); // タイマーを停止
               if (mode === "work") {
-                void confetti(); //紙吹雪を表示
+                void confetti(); // 紙吹雪を表示
               }
               void playNotificationSound();
 
-              //少し遅延させてからモード切替と自動開始を実行
+              // 少し遅延させてからモード切り替えと自動開始を実行
               setTimeout(() => {
-                toggleMode(); //モードを自動で切替
+                toggleMode(); // モードを自動切り替え
               }, 100);
-              return prev; //現在の状態（0分0秒）を返す
+              return prev; // 現在の状態（0分0秒）を返す
             }
-            //分数がまだ残っている場合
+            // 分数がまだ残っている場合は、分を1減らして秒を59にセット
             return { minutes: prev.minutes - 1, seconds: 59 };
           }
-          //秒数が1以上の場合は、秒を1減らす
+          // 秒数が1以上の場合は、秒を1減らす
           return { ...prev, seconds: prev.seconds - 1 };
         });
-      }, 1); //動作確認用に1ミリ秒を設定
+      }, 1); // 動作確認用に1ミリ秒ごとに実行
     }
 
-    //クリーンアップ関数
+    // クリーンアップ関数（コンポーネントのアンマウント時やisRunningが変わる前に実行される）
     return () => {
+      // ブラウザのタイマーが設定されている場合は、それをクリアする
       if (intervalId) {
         clearInterval(intervalId);
       }
     };
-  }, [isRunning]);
-
-  useEffect(() => {
-    const testGemini = async () => {
-      const suggestion = await generateRefreshSuggestion();
-      console.log(suggestion);
-    };
-    testGemini();
-  }, []);
+  }, [isRunning]); // isRunningが変わったときだけこのエフェクトを再実行
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4 relative">
@@ -227,7 +228,7 @@ const TimerApp = () => {
         mode={mode}
       />
       <RefreshSuggestion
-        suggestion="hoge"
+        suggestion={refreshSuggestion}
         onClose={() => setRefreshSuggestion(null)}
       />
     </div>

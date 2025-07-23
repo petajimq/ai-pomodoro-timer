@@ -24,7 +24,7 @@ const RefreshSuggestion = ({ suggestion, onClose }: RefreshSuggestionProps) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="fixed bottom-8 left-1/2 transform -translate-x-1/2 
+          className="fixed bottom-8 left-1/2 transform -translate-x-1/2
           bg-white p-4 rounded-lg shadow-lg border border-gray-200"
         >
           <button
@@ -33,7 +33,9 @@ const RefreshSuggestion = ({ suggestion, onClose }: RefreshSuggestionProps) => {
           >
             <X size={16} />
           </button>
-          <p className="text-lg font-medium text-gray-700 pr-6 ">{suggestion}</p>
+          <p className="text-lg font-medium text-gray-700 pr-6 ">
+            {suggestion}
+          </p>
         </motion.div>
       )}
     </AnimatePresence>
