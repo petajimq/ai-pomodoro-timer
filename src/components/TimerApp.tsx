@@ -7,6 +7,7 @@ import {
   CardFooter,
 } from "./ui/card";
 import TimerDisplay from "./TimerDisplay";
+import RefreshSuggestion from "./RefreshSuggestion";
 import Controls from "./Controls";
 import MetadataUpdater from "./MetaDataUpdater";
 import { useState, useEffect } from "react";
@@ -48,6 +49,11 @@ const TimerApp = () => {
 
   //自動開始の設定
   const [autoStart, setAutoStart] = useState(false);
+
+  //リフレッシュ提案
+  const [refreshSuggestion, setRefreshSuggestion] = useState<string | null>(
+    null
+  );
 
   //モードを切り替える関数
   const toggleMode = () => {
@@ -219,6 +225,10 @@ const TimerApp = () => {
         minutes={timeLeft.minutes}
         seconds={timeLeft.seconds}
         mode={mode}
+      />
+      <RefreshSuggestion
+        suggestion="hoge"
+        onClose={() => setRefreshSuggestion(null)}
       />
     </div>
   );
