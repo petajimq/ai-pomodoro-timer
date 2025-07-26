@@ -19,7 +19,7 @@ export const generateRefreshSuggestion = async (): Promise<string> => {
 
     const data = await response.json();
     return data.suggestion;
-  } catch (err: any) {
+  } catch (err) {
     console.error(
       err,
       "Failed to generate suggestion (client-side fetch error)"

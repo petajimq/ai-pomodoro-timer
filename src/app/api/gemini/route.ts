@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 // Gemini API クライアントの初期化
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
-export async function POST(request: Request) {
+export async function POST() {
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   const prompt = `
   # 命令
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     const result = await model.generateContent(prompt);
     const text = result.response.text();
     return NextResponse.json({ suggestion: text.trim() }, { status: 200 });
-  } catch (err: any) {
+  } catch (err) {
     console.error("Gemini API Error in API route:", err);
     return NextResponse.json(
       { message: "ゆっくり深呼吸をしよう😺" },

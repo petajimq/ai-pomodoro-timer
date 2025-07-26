@@ -20,7 +20,7 @@ import { generateRefreshSuggestion } from "@/utils/gemini";
 type Mode = "work" | "break";
 
 const TimerApp = () => {
-  const { reward: confetti, isAnimating } = useReward(
+  const { reward: confetti } = useReward(
     "confettiReward",
     "confetti",
     {
@@ -123,7 +123,7 @@ const TimerApp = () => {
           // 秒数が1以上の場合は、秒を1減らす
           return { ...prev, seconds: prev.seconds - 1 };
         });
-      }, 1); // 動作確認用に1ミリ秒ごとに実行
+      }, 1000); // 動作確認用に1ミリ秒ごとに実行
     }
 
     // クリーンアップ関数（コンポーネントのアンマウント時やisRunningが変わる前に実行される）
